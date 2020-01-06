@@ -1,0 +1,2 @@
+/dev/dk1               /       ffs     rw           1 1
+/dev/dk0	       /efi   msdos   rw	    0 0

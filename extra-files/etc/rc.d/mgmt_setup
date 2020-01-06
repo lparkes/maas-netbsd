@@ -1,0 +1,89 @@
+#!/bin/sh
+#
+# $NetBSD: mgmt_setup,v 1.3 2018/10/06 09:58:55 jmcneill Exp $
+#
+
+# PROVIDE: mgmt_setup
+# REQUIRE: NETWORK
+# BEFORE: LOGIN
+
+$_rc_subr_loaded . /etc/rc.subr
+
+name="mgmt_setup"
+rcvar=$name
+start_cmd="mgmt_setup_start"
+stop_cmd=":"
+
+maybe_install_dist_package()
+{
+    pkg_name=$1
+    dist_version=$2
+    
+    pkg_info -qE $pkg_name || pkg_add /dist/${pkg_name}-${dist_version}.tgz
+}
+
+maybe_install_package()
+{
+    pkg_name=$1
+    
+    pkg_info -qE $pkg_name || /usr/pkg/bin/pkgin -y in $pkg_name
+}
+
+maas_md_get()
+{
+    key=$1
+    config_file=${2:-$(basename $key)}
+
+    /usr/local/sbin/maas-md-get -c /etc/maas/curtin.cfg latest/$key > /etc/maas/$config_file
+}
+
+curtin_cleanup()
+{
+    case $(sysctl -n kern.root_device) in
+	dk*)
+	    test -f /efi/curtin.cfg && mv /efi/curtin.cfg /etc/maas/
+	    rm -rf /efi/root
+	    ;;
+	wd*)
+	    eval $(fdisk -S)
+	    if [ "$PART1ID" = "6" ]; then
+		mount -t msdos /dev/wd0e /mnt
+		cp /mnt/curtin.cfg /etc/maas/
+		umount /mnt
+		/sbin/fdisk -f -u -1 -s 0/0/0 ${disk}
+		/sbin/disklabel wd0 | grep -v '^ e:.*MSDOS' > /tmp/wd0.label
+		/sbin/disklabel -R wd0 /tmp/wd0.label
+		echo Rebooting to resize the boot partition
+		/sbin/reboot
+	    fi    
+	    ;;
+	*) ;;
+    esac
+}
+
+mgmt_setup_start()
+{
+    curtin_cleanup
+
+    maybe_install_dist_package pkg_install 20191008
+    maybe_install_dist_package pkgin 0.13.0
+
+    /usr/pkg/bin/pkgin update
+
+    maybe_install_package py37-oauthlib
+    maybe_install_package py37-yaml
+    maybe_install_package zsh
+    maybe_install_package bash
+    maybe_install_package sudo
+
+    maas_md_get meta-data/public-keys authorized_keys
+    maas_md_get meta-data/local-hostname hostname
+    maas_md_get meta-data/vendor-data
+    # This last one also tells MAAS that deployment has finished.
+    maas_md_get user-data
+
+    /usr/local/sbin/cloud-config -c /etc/maas/user-data
+}
+
+load_rc_config $name
+run_rc_command "$1"

@@ -1,0 +1,59 @@
+#!/usr/bin/env python3
+#
+# curtin-hooks - Curtin installation hooks for VMware ESXi
+#
+# Author: Lee Trager <lee.trager@canonical.com>
+#
+# Copyright (C) 2019 Canonical
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+from curtin.config import load_command_config
+from curtin.util import load_command_environment
+
+from subprocess import check_call
+import os
+import shutil
+import tempfile
+import yaml
+
+
+def write_config(target, config):
+    """Write the network config and MAAS credentials to the FAT partition used for config.
+
+    Writes the network configuration and MAAS credentials to the FAT partition
+    because it's the only one that Linux can write to.
+
+    """
+
+    curtin_cfg_path = os.path.dirname(__file__) + '.cfg'
+    with open(curtin_cfg_path, 'w') as f:
+        f.write(yaml.dump(config))
+        
+def cleanup():
+    """Remove curtin-hooks so its as if we were never here."""
+    curtin_dir = os.path.dirname(__file__)
+    shutil.rmtree(curtin_dir)
+
+
+def main():
+    state = load_command_environment()
+    config = load_command_config(None, state)
+
+    write_config(state['target'], config)
+    cleanup()
+
+
+if __name__ == "__main__":
+    main()

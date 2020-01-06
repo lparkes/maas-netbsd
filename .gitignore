@@ -1,0 +1,3 @@
+bin/*/netbsd
+bin/*/dist/*.tgz
+*~

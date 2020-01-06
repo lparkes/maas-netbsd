@@ -1,0 +1,17 @@
+. type=dir uname=root gname=wheel mode=0755
+./netbsd type=file uname=root gname=wheel mode=0644
+./etc/rc.conf type=file uname=root gname=wheel mode=0644
+./etc/rc.d/mgmt_setup type=file uname=root gname=wheel mode=0755
+./etc/rc.d/resize_disklabel type=file uname=root gname=wheel mode=0755
+./etc/maas type=dir uname=root gname=wheel mode=0700
+./dist type=dir uname=root gname=wheel mode=0755
+./dist/pkg_install-20191008.tgz type=file uname=root gname=wheel mode=0644 nlink=1
+./dist/pkgin-0.13.0.tgz type=file uname=root gname=wheel mode=0644 nlink=1
+./usr/local type=dir uname=root gname=wheel mode=0755
+./usr/local/sbin type=dir uname=root gname=wheel mode=0755
+./usr/local/sbin/maas-md-get type=file uname=root gname=wheel mode=0755
+./usr/local/sbin/cloud-config type=file uname=root gname=wheel mode=0755
+./usr/pkg type=dir uname=root gname=wheel mode=0755
+./usr/pkg/etc type=dir uname=root gname=wheel mode=0755
+./usr/pkg/etc/pkgin type=dir uname=root gname=wheel mode=0755
+./usr/pkg/etc/pkgin/repositories.conf type=file uname=root gname=wheel mode=0644

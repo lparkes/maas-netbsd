@@ -1,0 +1,4 @@
+. type=dir uname=root gname=wheel mode=0755
+./boot.cfg type=file uname=root gname=wheel mode=0644
+./etc/fstab type=file uname=root gname=wheel mode=0644
+./efi type=dir uname=root gname=wheel mode=0755
